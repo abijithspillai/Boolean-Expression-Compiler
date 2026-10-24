@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boolean Expression Compiler | Compiler Design Project</title>
+    <meta name="description" content="A comprehensive Boolean Expression Mini Compiler featuring Lexical Analysis, Recursive-Descent Parsing, AST Visualization, Semantic Type Checking, and Evaluation.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="theme-dark">
+    <!-- Main Application Shell -->
+    <div class="app-container">
+        
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Boolean Expression Compiler</h1>
+                    <span class="brand-subtitle">Compiler Design Academic Mini Project &bull; Python Flask &bull; Recursive Descent</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-indicator online" id="backendStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="statusText">Checking Backend...</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnHelp" title="Compiler Architecture Guide">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Pipeline Guide
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <main class="main-layout">
+            
+            <!-- Left Column: Expression Editor & Symbol Table -->
+            <section class="panel editor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        Source Expression Editor
+                    </div>
+                    <div class="editor-header-controls">
+                        <select id="exampleSelector" class="form-select" title="Load Pre-configured Example">
+                            <option value="">⚡ Load Example Expression...</option>
+                            <optgroup label="Basic Comparisons">
+                                <option value="a > b">a > b (Relational Greater)</option>
+                                <option value="a < b">a < b (Relational Less)</option>
+                                <option value="a == b">a == b (Equality Check)</option>
+                                <option value="a != b">a != b (Inequality Check)</option>
+                            </optgroup>
+                            <optgroup label="Logical Expressions">
+                                <option value="a > b && c < d">a > b && c < d (Logical AND)</option>
+                                <option value="a > b || c < d">a > b || c < d (Logical OR)</option>
+                                <option value="!isValid">!isValid (Logical NOT)</option>
+                                <option value="!(a > b)">!(a > b) (Grouped NOT)</option>
+                            </optgroup>
+                            <optgroup label="Precedence & Grouping">
+                                <option value="a > b || c < d && !isValid">a > b || c < d && !isValid (Precedence)</option>
+                                <option value="(a > b) && (c != d)">(a > b) && (c != d) (Parentheses)</option>
+                                <option value="(x1 > 10) && (x1 < 100)">(x1 > 10) && (x1 < 100) (Range Check)</option>
+                                <option value="!((a > b) || ((c < d) && isValid))">Nested Parentheses Expression</option>
+                            </optgroup>
+                            <optgroup label="Invalid Syntax Cases">
+                                <option value="a >">a > (Missing Right Operand)</option>
+                                <option value="&& a">&& a (Leading Operator)</option>
+                                <option value="a && && b">a && && b (Double Operator)</option>
+                                <option value="(a > b">(a > b (Unclosed Parenthesis)</option>
+                                <option value="a > b)">a > b) (Unmatched Closing Paren)</option>
+                                <option value="a b">a b (Missing Operator)</option>
+                                <option value="a < < b">a < < b (Duplicate RelOp)</option>
+                                <option value="!">! (Dangling NOT Operator)</option>
+                                <option value="a & b">a & b (Lexical Single &)</option>
+                                <option value="a < b < c">a < b < c (Disallowed Chained Comp)</option>
+                            </optgroup>
+                            <optgroup label="Semantic Errors (Type Mismatches)">
+                                <option value="a && isValid">a && isValid (Number in Logical AND)</option>
+                                <option value="!a">!a (NOT applied to Number)</option>
+                                <option value="a == isValid">a == isValid (Comparing Number to Boolean)</option>
+                                <option value="isValid > 10">isValid > 10 (Relational on Boolean)</option>
+                                <option value="undeclaredVar > 10">undeclaredVar > 10 (Undeclared Variable)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Code Editor Area -->
+                <div class="editor-container">
+                    <div class="line-numbers" id="lineNumbers">1</div>
+                    <textarea 
+                        id="expressionInput" 
+                        class="code-textarea" 
+                        placeholder="Enter Boolean expression, e.g. a > b && c != d" 
+                        rows="4"
+                        spellcheck="false"
+                    >a > b && c != d</textarea>
+                </div>
+
+                <div class="editor-footer">
+                    <div class="editor-shortcuts">
+                        <span class="badge badge-subtle">Ctrl + Enter</span> to Compile
+                    </div>
+                    <div class="editor-btn-group">
+                        <button class="btn btn-secondary" id="btnClear" title="Clear Editor">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Clear
+                        </button>
+                        <button class="btn btn-primary" id="btnCompile">
+                            <span class="btn-spinner" id="compileSpinner"></span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="compileIcon">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Compile & Analyze
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Symbol Table Section -->
+                <div class="symbol-table-container">
+                    <div class="subpanel-header">
+                        <div class="subpanel-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="9" y1="21" x2="9" y2="9"></line>
+                            </svg>
+                            Symbol Table & Variable Declarations
+                        </div>
+                        <button class="btn btn-secondary btn-xs" id="btnAddSymbol" title="Add a new variable">
+                            + Add Variable
+                        </button>
+                    </div>
+
+                    <div class="symbol-table-wrapper">
+                        <table class="data-table" id="symbolTableGrid">
+                            <thead>
+                                <tr>
+                                    <th>Variable Name</th>
+                                    <th>Data Type</th>
+                                    <th>Sample Value (For Eval)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="symbolTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="compiler-options-bar">
+                        <label class="toggle-option">
+                            <input type="checkbox" id="chkStrictMode" checked>
+                            <span class="toggle-label">Strict Semantic Mode (Require Variable Declarations)</span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="checkbox" id="chkEvaluate" checked>
+                            <span class="toggle-label">Evaluate Expression with Sample Values</span>
+                        </label>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right Column: Compilation Results Workbench -->
+            <section class="panel results-panel">
+                <div class="panel-header">
+                    <div class="tabs-nav" id="resultsTabs">
+                        <button class="tab-btn active" data-tab="tab-overview">
+                            <span class="tab-dot"></span>Overview
+                        </button>
+                        <button class="tab-btn" data-tab="tab-tokens">
+                            Tokens <span class="badge badge-counter" id="badgeTokenCount">0</span>
+                        </button>
+                        <button class="tab-btn" data-tab="tab-ast">
+                            AST Tree
+                        </button>
+                        <button class="tab-btn" data-tab="tab-grammar">
+                            CFG & Parser
+                        </button>
+                        <button class="tab-btn" data-tab="tab-semantics">
+                            Semantic Types
+                        </button>
+                        <button class="tab-btn" data-tab="tab-errors">
+                            Errors <span class="badge badge-counter badge-danger" id="badgeErrorCount">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tab-content-area">
+                    
+                    <!-- TAB 1: OVERVIEW -->
+                    <div class="tab-pane active" id="tab-overview">
+                        <div class="overview-grid">
+                            
+                            <!-- Master Status Card -->
+                            <div class="status-card" id="masterStatusCard">
+                                <div class="status-card-header">
+                                    <div class="status-icon" id="statusIcon">⚡</div>
+                                    <div>
+                                        <div class="status-lead" id="statusLead">Ready for Compilation</div>
+                                        <div class="status-sub" id="statusSub">Enter an expression or load an example to run the compiler pipeline.</div>
+                                    </div>
+                                </div>
+                                <div class="status-metrics">
+                                    <div class="metric-box">
+                                        <span class="metric-label">Pipeline Status</span>
+                                        <span class="metric-val" id="metricResult">PENDING</span>
+                                    </div>
+                                    <div class="metric-box">
+                                        <span class="metric-label">Inferred Type</span>
+                                        <span class="metric-val type-badge" id="metricType">--</span>
+                                    </div>
+                                    <div class="metric-box">
+                                        <span class="metric-label">Evaluation Result</span>
+                                        <span class="metric-val eval-badge" id="metricEval">--</span>
+                                    </div>
+                                    <div class="metric-box">
+                                        <span class="metric-label">Total Execution</span>
+                                        <span class="metric-val" id="metricTime">-- ms</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Compiler Pipeline Stepper -->
+                            <div class="pipeline-card">
+                                <h3 class="card-title">Compiler Phases Execution Breakdown</h3>
+                                <div class="pipeline-stepper" id="pipelineStepper">
+                                    <!-- Populated dynamically -->
+                                    <div class="empty-state">No compilation run yet. Click "Compile & Analyze" to begin.</div>
+                                </div>
+                            </div>
+
+                            <!-- Expression Summary & Evaluation Details -->
+                            <div class="eval-card" id="evalCardSection">
+                                <h3 class="card-title">Expression Evaluation Details</h3>
+                                <div class="eval-details-box" id="evalDetailsBox">
+                                    <p class="text-muted">Evaluation will run automatically after semantic analysis if all referenced variables have sample values.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: TOKENS -->
+                    <div class="tab-pane" id="tab-tokens">
+                        <div class="pane-action-bar">
+                            <span class="pane-subtitle" id="tokensSubtitle">Token Stream (Lexical Output)</span>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-xs" id="btnCopyTokens">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                    Copy Tokens JSON
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="data-table" id="tokensTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Token Type</th>
+                                        <th>Lexeme</th>
+                                        <th>Line</th>
+                                        <th>Column</th>
+                                        <th>Literal Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tokensTableBody">
+                                    <tr><td colspan="6" class="text-center text-muted">No tokens generated yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: AST -->
+                    <div class="tab-pane" id="tab-ast">
+                        <div class="pane-action-bar">
+                            <div class="view-switch">
+                                <button class="btn btn-secondary btn-xs active" id="btnViewSvg">Visual Graph Layout</button>
+                                <button class="btn btn-secondary btn-xs" id="btnViewText">Indented Tree View</button>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-xs" id="btnCopyAst">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                    Copy AST JSON
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Graphical SVG Tree Container -->
+                        <div class="ast-visual-container" id="astSvgContainer">
+                            <div class="empty-state">Construct an expression to view the dynamically generated Abstract Syntax Tree.</div>
+                        </div>
+
+                        <!-- Formatted Text Tree Container (Toggled) -->
+                        <div class="ast-text-container" id="astTextContainer" style="display: none;">
+                            <pre class="code-block" id="astTreeText">No AST generated yet.</pre>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: GRAMMAR & PARSER -->
+                    <div class="tab-pane" id="tab-grammar">
+                        <div class="grammar-container">
+                            <div class="grammar-section">
+                                <h3 class="card-title">Context-Free Grammar (CFG) Specification</h3>
+                                <pre class="grammar-box"><code>Expression      &rarr; ORExpression
+ORExpression    &rarr; ANDExpression ( '||' ANDExpression )*
+ANDExpression   &rarr; NOTExpression ( '&&' NOTExpression )*
+NOTExpression   &rarr; '!' NOTExpression | Comparison
+Comparison      &rarr; Primary ( RelOp Primary )?
+RelOp           &rarr; '&gt;' | '&lt;' | '==' | '!='
+Primary         &rarr; IDENTIFIER | NUMBER | BOOLEAN | '(' Expression ')'</code></pre>
+                            </div>
+
+                            <div class="grammar-section">
+                                <h3 class="card-title">Operator Precedence & Associativity Hierarchy</h3>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Precedence Level</th>
+                                            <th>Operators / Production</th>
+                                            <th>Associativity</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge badge-accent">1 (Highest)</span></td>
+                                            <td><code>( )</code>, Literals, IDs</td>
+                                            <td>Non-associative</td>
+                                            <td>Primary expressions and grouping parentheses</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-accent">2</span></td>
+                                            <td><code>!</code> (NOT)</td>
+                                            <td>Right-to-Left</td>
+                                            <td>Unary logical inversion</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-accent">3</span></td>
+                                            <td><code>&gt;</code>, <code>&lt;</code>, <code>==</code>, <code>!=</code></td>
+                                            <td>Non-chaining</td>
+                                            <td>Relational and equality comparisons</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-accent">4</span></td>
+                                            <td><code>&&</code> (AND)</td>
+                                            <td>Left-to-Right</td>
+                                            <td>Conjunction of boolean conditions</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge badge-accent">5 (Lowest)</span></td>
+                                            <td><code>||</code> (OR)</td>
+                                            <td>Left-to-Right</td>
+                                            <td>Disjunction of boolean conditions</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="grammar-section">
+                                <h3 class="card-title">Parser Derivation & Grouping Explanation</h3>
+                                <div class="explanation-box" id="grammarDerivationBox">
+                                    <p class="text-muted">Enter an expression to see how the recursive-descent parser evaluated its precedence.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: SEMANTIC ANALYSIS -->
+                    <div class="tab-pane" id="tab-semantics">
+                        <div class="semantics-container">
+                            <div class="semantics-section">
+                                <h3 class="card-title">Referenced Identifiers & Type Binding</h3>
+                                <table class="data-table" id="usedVariablesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Identifier</th>
+                                            <th>Declaration Status</th>
+                                            <th>Bound Type</th>
+                                            <th>Sample Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usedVariablesTableBody">
+                                        <tr><td colspan="4" class="text-center text-muted">No variable usage analyzed yet.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="semantics-section">
+                                <h3 class="card-title">Language Type System & Semantic Invariants</h3>
+                                <div class="type-rules-grid">
+                                    <div class="rule-card">
+                                        <div class="rule-title">Relational Operators (<code>&gt;</code>, <code>&lt;</code>)</div>
+                                        <p class="rule-desc">Operands must both evaluate to <strong>number</strong>. Resulting expression type is <strong>boolean</strong>.</p>
+                                    </div>
+                                    <div class="rule-card">
+                                        <div class="rule-title">Equality Operators (<code>==</code>, <code>!=</code>)</div>
+                                        <p class="rule-desc">Operands must be of <strong>compatible types</strong> (both numbers or both booleans). Resulting type is <strong>boolean</strong>.</p>
+                                    </div>
+                                    <div class="rule-card">
+                                        <div class="rule-title">Logical Operators (<code>&&</code>, <code>||</code>)</div>
+                                        <p class="rule-desc">Operands must both evaluate to <strong>boolean</strong>. Resulting expression type is <strong>boolean</strong>.</p>
+                                    </div>
+                                    <div class="rule-card">
+                                        <div class="rule-title">Unary NOT (<code>!</code>)</div>
+                                        <p class="rule-desc">Operand must evaluate to <strong>boolean</strong>. Applying <code>!</code> to a number triggers a semantic error.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: ERRORS & WARNINGS -->
+                    <div class="tab-pane" id="tab-errors">
+                        <div class="errors-container" id="errorsContainer">
+                            <div class="empty-state">No errors detected. Expression is clean!</div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Compiler Pipeline Modal / Guide -->
+        <div class="modal-backdrop" id="modalHelp">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h2 class="modal-title">How the Boolean Compiler Pipeline Works</h2>
+                    <button class="modal-close" id="btnCloseHelp">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="pipeline-flow-step">
+                        <div class="step-num">1</div>
+                        <div>
+                            <h4>Lexical Analysis (lexer.py)</h4>
+                            <p>Scans the input characters into tokens using longest-match recognition. Converts characters into token types: <code>IDENTIFIER</code>, <code>NUMBER</code>, <code>BOOLEAN</code>, <code>GT</code>, <code>LT</code>, <code>EQ</code>, <code>NEQ</code>, <code>AND</code>, <code>OR</code>, <code>NOT</code>, <code>LPAREN</code>, <code>RPAREN</code>.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-flow-step">
+                        <div class="step-num">2</div>
+                        <div>
+                            <h4>Syntax Analysis (parser.py)</h4>
+                            <p>Uses recursive-descent parsing based on a Context-Free Grammar (CFG). Enforces operator precedence (Parentheses &gt; NOT &gt; RelOps &gt; AND &gt; OR) and constructs the Abstract Syntax Tree.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-flow-step">
+                        <div class="step-num">3</div>
+                        <div>
+                            <h4>AST Construction (ast_nodes.py)</h4>
+                            <p>Creates strongly typed AST nodes: <code>BinaryOpNode</code>, <code>UnaryOpNode</code>, <code>IdentifierNode</code>, <code>NumberNode</code>, and <code>BooleanNode</code>.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-flow-step">
+                        <div class="step-num">4</div>
+                        <div>
+                            <h4>Semantic Analysis (semantic_analyzer.py)</h4>
+                            <p>Traverses the AST with a Symbol Table to verify types. Prevents type mismatches like comparing numbers to booleans or applying logical operators to numbers.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-flow-step">
+                        <div class="step-num">5</div>
+                        <div>
+                            <h4>Expression Evaluation</h4>
+                            <p>If all variables have sample values assigned in the symbol table, the AST is safely evaluated to produce a boolean result (<code>true</code> or <code>false</code>) without using Python's <code>eval()</code>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Area -->
+        <div class="toast-container" id="toastContainer"></div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
