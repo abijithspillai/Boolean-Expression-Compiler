@@ -3,9 +3,8 @@
 ## Boolean Expression Compiler: Front-End Architecture, Semantic Validation, and AST Visualization
 
 **Course:** Compiler Design (Academic Mini Project)  
-**Author:** Abijith S Pillai  
-**Repository:** https://github.com/abijithspillai/Boolean-Expression-Compiler  
-**Target Platform:** Render Cloud Web Service  
+**Project Type:** Mini Compiler / Compiler Front-End  
+**Language:** Python & Web Interface  
 
 ---
 

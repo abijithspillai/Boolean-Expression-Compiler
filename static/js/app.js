@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
         tabBtn.classList.add('active');
+        tabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         const targetPane = document.getElementById(targetTabId);
         if (targetPane) targetPane.classList.add('active');
     });

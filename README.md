@@ -7,7 +7,6 @@ This application demonstrates actual compiler engineering principles: lexical sc
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-Flask%203.x-green.svg)](https://flask.palletsprojects.com/)
 [![Tests](https://img.shields.io/badge/Unit%20Tests-43%20Passed-brightgreen.svg)]()
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com)
 
 ---
 
@@ -18,13 +17,11 @@ This application demonstrates actual compiler engineering principles: lexical sc
 - [Compiler Architecture](#compiler-architecture)
 - [Grammar & Operator Precedence](#grammar--operator-precedence)
 - [Supported Operators & Syntax](#supported-operators--syntax)
-- [Screenshots & UI Preview](#screenshots--ui-preview)
 - [Quick Start (Local Setup)](#quick-start-local-setup)
 - [Automated Testing](#automated-testing)
 - [REST API Reference](#rest-api-reference)
-- [Render Deployment Guide](#render-deployment-guide)
 - [Academic Deliverables & Documentation](#academic-deliverables--documentation)
-- [Contributors & License](#contributors--license)
+- [License](#license)
 
 ---
 
@@ -35,7 +32,7 @@ This application demonstrates actual compiler engineering principles: lexical sc
 - **Primary Language:** Python 3.12
 - **Backend Framework:** Flask
 - **Frontend:** HTML5, CSS3 (Modern Developer Studio Theme), Vanilla JavaScript
-- **Deployment Platform:** Render / Localhost
+- **Execution:** Local Web Application / Production WSGI
 
 Unlike trivial expression evaluators that use regex or JavaScript's `eval()`, this project implements genuine, decoupled compiler stages that isolate lexical, syntax, and semantic errors.
 
@@ -280,37 +277,6 @@ OK
 
 ---
 
-## 🚀 Render Deployment Guide
-
-This project is pre-configured for **1-click or standard Web Service deployment on Render**:
-
-### Step 1: Push Code to GitHub
-
-```bash
-git add .
-git commit -m "Initial release of Boolean Expression Compiler"
-git branch -M main
-git remote add origin https://github.com/abijithspillai/Boolean-Expression-Compiler.git
-git push -u origin main
-```
-
-### Step 2: Deploy on Render
-
-1. Log in to [Render](https://render.com/).
-2. Click **New +** > **Web Service**.
-3. Select your repository: `Boolean-Expression-Compiler`.
-4. Configure the service settings:
-   - **Name:** `boolean-expression-compiler`
-   - **Environment:** `Python 3`
-   - **Region:** Any preferred region (e.g., Singapore, Frankfurt, Oregon)
-   - **Branch:** `main`
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app`
-5. Click **Create Web Service**.
-6. Render will automatically build the environment, install packages, and deploy your live URL (e.g. `https://boolean-expression-compiler.onrender.com`).
-
----
-
 ## 📚 Academic Deliverables & Documentation
 
 Complete academic deliverables are located in the `docs/` directory:
@@ -321,8 +287,8 @@ Complete academic deliverables are located in the `docs/` directory:
 
 ---
 
-## 👥 Contributors & License
+## 📜 License
 
-- **Developer:** Abijith S Pillai
 - **Course:** Compiler Design Mini Project
 - **License:** MIT License
+

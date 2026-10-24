@@ -1,8 +1,7 @@
 # Presentation Outline & Viva Preparation
 
 **Project Title:** Boolean Expression Compiler  
-**Subject:** Compiler Design  
-**Author:** Abijith S Pillai  
+**Subject:** Compiler Design Mini Project  
 **Technology:** Python, Flask, HTML5, CSS3, JavaScript  
 
 ---
@@ -13,7 +12,6 @@
 - **Header:** Boolean Expression Compiler
 - **Subtitle:** An Interactive Compiler Front-End for Boolean Expressions
 - **Subject:** Compiler Design Academic Mini Project
-- **Presenter:** Abijith S Pillai
 - **Key Points:**
   - Full front-end compiler pipeline implemented in Python.
   - Interactive Developer Studio UI with live AST rendering.
